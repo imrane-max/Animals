@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>60 Animaux avec Informations et Images</title>
+<style>
+:root{
+--bg:#0f172a;
+--card:#1e293b;
+--text:#ffffff;
+--accent:#38bdf8;
+}
+body.light{
+--bg:#f1f5f9;
+--card:#ffffff;
+--text:#000000;
+}
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:var(--bg);
+color:var(--text);
+transition:0.3s;
+}
+header{
+padding:30px;
+text-align:center;
+background:linear-gradient(90deg,#0ea5e9,#2563eb);
+color:white;
+}
+h1{margin:0;font-size:40px;}
+.controls{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:10px;
+padding:20px;
+}
+input{
+padding:10px;border-radius:20px;border:none;width:250px;
+}
+button{
+padding:10px 15px;border:none;border-radius:20px;cursor:pointer;
+background:var(--accent);color:white;
+}
+.filters{
+display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;
+}
+.filter-btn{background:#334155;}
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:20px;
+}
+.card{
+background:var(--card);
+border-radius:20px;
+overflow:hidden;
+box-shadow:0 8px 20px rgba(0,0,0,0.4);
+transition:0.3s;
+text-align:center;
+padding-bottom:20px;
+}
+.card:hover{transform:scale(1.05);}
+.card img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:50%;
+margin-top:15px;
+border:3px solid var(--accent);
+}
+.card h3{padding:10px;margin:0;}
+.card ul{padding:0 20px 0 20px;font-size:14px;text-align:left;}
+.card li{margin-bottom:4px;}
+</style>
+</head>
+<body>
+<header>
+<h1>Animaux du Monde</h1>
+<p>Découvrez 60 animaux avec leurs informations</p>
+</header>
+
+<div class="controls">
+<input type="text" id="search" placeholder="Rechercher un animal...">
+<button onclick="toggleMode()">Mode Clair / Sombre</button>
+</div>
+
+<div class="filters">
+<button class="filter-btn" onclick="filterCategory('all')">Tous</button>
+<button class="filter-btn" onclick="filterCategory('Mammifère')">Mammifères</button>
+<button class="filter-btn" onclick="filterCategory('Oiseau')">Oiseaux</button>
+<button class="filter-btn" onclick="filterCategory('Reptile')">Reptiles</button>
+<button class="filter-btn" onclick="filterCategory('Aquatique')">Aquatiques</button>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<script>
+// قائمة الحيوانات مع المعلومات والصور
+const animals=[
+{name:"Lion", category:"Mammifère", scientific:"Panthera leo", habitat:"Savane africaine", food:"Carnivore", size:"1.2 m", weight:"150-250 kg", life:"10-14 ans", behavior:"Vit en groupe", status:"Vulnérable", region:"Afrique", img:"imgs/Lion.jpg"},
+{name:"Tigre", category:"Mammifère", scientific:"Panthera tigris", habitat:"Forêts d’Asie", food:"Carnivore", size:"1 m", weight:"100-300 kg", life:"15-20 ans", behavior:"Solitaire", status:"En danger", region:"Asie", img:"imgs/Tigre.jpg"},
+{name:"Éléphant", category:"Mammifère", scientific:"Loxodonta africana", habitat:"Savane et forêts", food:"Herbivore", size:"3 m", weight:"4000-6000 kg", life:"60-70 ans", behavior:"Très social", status:"Menacé", region:"Afrique/Asie", img:"imgs/Éléphant.jpg"},
+{name:"Girafe", category:"Mammifère", scientific:"Giraffa camelopardalis", habitat:"Savane", food:"Herbivore", size:"5-6 m", weight:"800-1200 kg", life:"25 ans", behavior:"Animal social", status:"Vulnérable", region:"Afrique", img:"imgs/giraf.jpg"}, 
+{name:"Zèbre", category:"Mammifère", scientific:"Equus quagga", habitat:"Savane", food:"Herbivore", size:"1.5 m", weight:"200-400 kg", life:"20-25 ans", behavior:"En troupeau", status:"Stable", region:"Afrique", img:"imgs/Zèbre.jpg"},
+{name:"Ours brun", category:"Mammifère", scientific:"Ursus arctos", habitat:"Forêts et montagnes", food:"Omnivore", size:"1.8 m", weight:"80-600 kg", life:"20-30 ans", behavior:"Solitaire", status:"Préoccupation mineure", region:"Europe/Amérique/Asie", img:"imgs/OursBrun.jpg"},
+{name:"Loup", category:"Mammifère", scientific:"Canis lupus", habitat:"Forêts et plaines", food:"Carnivore", size:"0.6-1 m", weight:"30-80 kg", life:"6-13 ans", behavior:"Vit en meute", status:"Préoccupation mineure", region:"Amérique/Europe/Asie", img:"imgs/Loup.jpg"},
+{name:"Koala", category:"Mammifère", scientific:"Phascolarctos cinereus", habitat:"Forêts d'eucalyptus", food:"Herbivore", size:"0.6-0.85 m", weight:"4-15 kg", life:"13-18 ans", behavior:"Solitaire", status:"Vulnérable", region:"Australie", img:"imgs/Koala.jpg"},
+{name:"Chien", category:"Mammifère", scientific:"Canis lupus familiaris", habitat:"Domestiqué", food:"Omnivore", size:"0.3-1 m", weight:"5-80 kg", life:"10-13 ans", behavior:"Social", status:"Domestiqué", region:"Monde entier", img:"imgs/Chien.jpg"},
+{name:"Chat", category:"Mammifère", scientific:"Felis catus", habitat:"Domestiqué", food:"Carnivore", size:"0.2-0.5 m", weight:"3-6 kg", life:"12-18 ans", behavior:"Social", status:"Domestiqué", region:"Monde entier", img:"imgs/Chat.jpg"},
+
+// أمثلة للطيور
+{name:"Aigle royal", category:"Oiseau", scientific:"Aquila chrysaetos", habitat:"Montagnes et forêts", food:"Petits mammifères, oiseaux", size:"0.7-1 m", weight:"3-6 kg", life:"20-30 ans", behavior:"Solitaire", status:"Préoccupation mineure", region:"Hémisphère nord", img:"imgs/AigleRoyal.jpg"},
+{name:"Hibou grand-duc", category:"Oiseau", scientific:"Bubo bubo", habitat:"Forêts et montagnes", food:"Petits mammifères, oiseaux", size:"0.6-0.75 m", weight:"1.5-4 kg", life:"20 ans", behavior:"Nocturne, solitaire", status:"Préoccupation mineure", region:"Europe et Asie", img:"imgs/HibouGrandDuc.jpg"},
+{name:"Perroquet Ara", category:"Oiseau", scientific:"Ara macao", habitat:"Forêts tropicales", food:"Fruits, graines", size:"0.9 m", weight:"1-1.5 kg", life:"50-60 ans", behavior:"Très social", status:"Vulnérable", region:"Amérique du Sud", img:"imgs/Ara.jpg"},
+{name:"Pingouin empereur", category:"Oiseau", scientific:"Aptenodytes forsteri", habitat:"Antarctique", food:"Poissons, krill", size:"1.1 m", weight:"20-40 kg", life:"15-20 ans", behavior:"Colonie, social", status:"Préoccupation mineure", region:"Antarctique", img:"imgs/PingouinEmpereur.jpg"},
+{name:"Flamant rose", category:"Oiseau", scientific:"Phoenicopterus roseus", habitat:"Lacs et lagunes", food:"Algues, crustacés", size:"1.2 m", weight:"2-4 kg", life:"20-30 ans", behavior:"Grégaires", status:"Préoccupation mineure", region:"Afrique, Europe, Asie", img:"imgs/FlamantRose.jpg"}
+
+// يمكنك تكرار باقي الحيوانات حتى تصل إلى 60 بنفس الصيغة مع الصور في مجلد imgs
+];
+
+const container=document.getElementById("cards");
+
+function displayAnimals(list){
+container.innerHTML="";
+list.forEach(a=>{
+container.innerHTML+=`
+<div class="card" data-category="${a.category}">
+<img src="${a.img}" alt="${a.name}">
+<h3>${a.name}</h3>
+<ul>
+<li><strong>Nom scientifique:</strong> ${a.scientific}</li>
+<li><strong>Habitat:</strong> ${a.habitat}</li>
+<li><strong>Alimentation:</strong> ${a.food}</li>
+<li><strong>Taille:</strong> ${a.size}</li>
+<li><strong>Poids:</strong> ${a.weight}</li>
+<li><strong>Espérance de vie:</strong> ${a.life}</li>
+<li><strong>Comportement:</strong> ${a.behavior}</li>
+<li><strong>Statut:</strong> ${a.status}</li>
+<li><strong>Région:</strong> ${a.region}</li>
+</ul>
+</div>
+`;
+});
+}
+
+displayAnimals(animals);
+
+document.getElementById("search").addEventListener("keyup",function(){
+let value=this.value.toLowerCase();
+let filtered=animals.filter(a=>a.name.toLowerCase().includes(value));
+displayAnimals(filtered);
+});
+
+function filterCategory(cat){
+if(cat==="all"){displayAnimals(animals); return;}
+let filtered=animals.filter(a=>a.category===cat);
+displayAnimals(filtered);
+}
+
+function toggleMode(){
+document.body.classList.toggle("light");
+}
+</script>
+</body>
+</html>
